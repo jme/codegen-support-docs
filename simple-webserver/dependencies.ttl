@@ -1,0 +1,35 @@
+#------------------------------------- 
+# webserver Dependencies
+#------------------------------------- 
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix proj: <urn:uuid:b9c22015-0e25-471e-91b5-250c7246a015#> .
+
+
+proj:dep-clojure a proj:Dependency ;
+    rdfs:label "org.clojure/clojure" ;
+    dcterms:description "Core Clojure language library." ;
+    proj:version "1.12.0" .
+
+proj:dep-ring-core a proj:Dependency ;
+    rdfs:label "ring/ring-core" ;
+    dcterms:description "The essential HTTP server abstraction for Clojure." ;
+    proj:version "1.14.1" .
+
+proj:dep-ring-jetty-adapter a proj:Dependency ;
+    rdfs:label "ring/ring-jetty-adapter" ;
+    dcterms:description "The web server that runs the Ring application." ;
+    proj:version "1.14.1" .
+
+proj:dep-compojure a proj:Dependency ;
+    rdfs:label "compojure" ;
+    dcterms:description "A concise routing library for Ring." ;
+    proj:version "1.7.1" .
+
+proj:dep-hiccup a proj:Dependency ;
+    rdfs:label "hiccup" ;
+    dcterms:description "A library for representing HTML in Clojure." ;
+    proj:version "2.0.0" .
+

@@ -1,0 +1,36 @@
+#------------------------------------- 
+# webserver CSS Stylesheet
+#------------------------------------- 
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix proj: <urn:uuid:b9c22015-0e25-471e-91b5-250c7246a015#> .
+@prefix css: <urn:uuid:4a850d5f-376f-4c0b-af5d-6515c11dbfde#> .
+
+
+css:stylesheet a proj:CssStylesheet ;
+    rdfs:label "style.css" ;
+    proj:hasRule css:rule-html-body, css:rule-body, css:rule-content .
+
+css:rule-html-body a proj:CssRule ;
+    proj:selector "html, body" ;
+    proj:hasDeclaration
+        [ proj:property "height"; proj:value "100%" ],
+        [ proj:property "margin"; proj:value "0" ],
+        [ proj:property "padding"; proj:value "0" ],
+        [ proj:property "font-family"; proj:value "monospace, sans-serif" ] .
+
+css:rule-body a proj:CssRule ;
+    proj:selector "body" ;
+    proj:hasDeclaration
+        [ proj:property "background-color"; proj:value "#333333" ],
+        [ proj:property "color"; proj:value "#00FF00" ],
+        [ proj:property "display"; proj:value "flex" ],
+        [ proj:property "justify-content"; proj:value "center" ],
+        [ proj:property "align-items"; proj:value "center" ],
+        [ proj:property "text-align"; proj:value "center" ] .
+
+css:rule-content a proj:CssRule ;
+    proj:selector ".content" ;
+    proj:hasDeclaration
+        [ proj:property "padding"; proj:value "1em" ] .

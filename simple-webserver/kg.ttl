@@ -1,0 +1,345 @@
+#------------------------------------- 
+# Example Knowledge Graph. Contains a variety of subgraphs, including doc, css, code and project lore
+#------------------------------------- 
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix file: <urn:uuid:ed15c01b-a2e8-4875--ada1-09bd236d885f#> .
+
+@prefix doc: <urn:uuid:693fc770-3642-42e6-9e25-c916de1c2420#> .
+@prefix clj: <urn:uuid:8e8d6715-d816-43fd-a5b6-ab358fde25b6#> .
+@prefix css: <urn:uuid:4a850d5f-376f-4c0b-af5d-6515c11dbfde#> .
+@prefix proj: <urn:uuid:b9c22015-0e25-471e-91b5-250c7246a015#> .
+
+
+# |Project Definition|
+
+proj:simple-server a doap:Project ;
+    doap:name "simple-server" ;
+    doap:version "1.0.0" ;
+    dcterms:description "Project simple-server A slightly secure, simple web application." ;
+    doap:homepage <http://example.com/project-simple-server> ;
+    doap:license <https://www.eclipse.org/legal/epl-2.0/> ;
+    proj:mainNamespace clj:simple-server.core ;
+    proj:hasFile file:project_clj, file:core_clj, file:style_css ;
+    proj:dependsOn proj:dep-clojure, proj:dep-ring-core, proj:dep-ring-jetty-adapter, proj:dep-compojure, proj:dep-hiccup .
+
+
+# |Source Files|
+
+file:project_clj a proj:SourceFile ;
+    rdfs:label "project.clj" ;
+    dcterms:format "text/x-clojure" .
+
+file:core_clj a proj:SourceFile ;
+    rdfs:label "core.clj" ;
+    dcterms:format "text/x-clojure" ;
+    proj:definesNamespace clj:simple-server.core .
+
+file:style_css a proj:SourceFile ;
+    rdfs:label "style.css" ;
+    rdfs:comment "This file is served from the 'public/css/' directory, as implied by the layout function's include-css and the wrap-resource middleware." ;
+    dcterms:format "text/css" ;
+    proj:definesStyle css:stylesheet .
+
+
+
+#------------------------------------- 
+# doc lore :  Models the specific rules, examples, and principles of the Clojure documentation standard.
+#------------------------------------- 
+
+#  |Classes| core concepts used to structure the documentation lore.
+
+doc:DocumentationStandard rdf:type rdfs:Class ;
+    rdfs:label "Documentation Standard" ;
+    rdfs:comment "A top-level class representing a set of documentation standards for a technology or project." .
+
+doc:Context rdf:type rdfs:Class ;
+    rdfs:label "Context" ;
+    rdfs:comment "The rationale or background explaining why the standard is necessary." .
+
+doc:RequirementCategory rdf:type rdfs:Class ;
+    rdfs:label "Requirement Category" ;
+    rdfs:comment "A category of documentation requirements, such as for dependencies or architecture." .
+
+doc:Requirement rdf:type rdfs:Class ;
+    rdfs:label "Requirement" ;
+    rdfs:comment "A specific rule or guideline within a requirement category." .
+
+doc:Example rdf:type rdfs:Class ;
+    rdfs:label "Example" ;
+    rdfs:comment "A concrete example illustrating a requirement." .
+
+doc:KeyPoint rdf:type rdfs:Class ;
+    rdfs:label "Key Point" ;
+    rdfs:comment "A summary or high-level principle of the documentation standard." .
+
+
+# |Properties|  The relationships that connect the doc classes.
+
+doc:hasContext rdf:type rdf:Property ;
+    rdfs:domain doc:DocumentationStandard ;
+    rdfs:range doc:Context .
+
+doc:hasRequirementCategory rdf:type rdf:Property ;
+    rdfs:domain doc:DocumentationStandard ;
+    rdfs:range doc:RequirementCategory .
+
+doc:hasRequirement rdf:type rdf:Property ;
+    rdfs:domain doc:RequirementCategory ;
+    rdfs:range doc:Requirement .
+
+doc:hasExample rdf:type rdf:Property ;
+    rdfs:domain doc:RequirementCategory ;
+    rdfs:range doc:Example .
+
+doc:hasKeyPoint rdf:type rdf:Property ;
+    rdfs:domain doc:DocumentationStandard ;
+    rdfs:range doc:KeyPoint .
+
+doc:hasCodeSnippet rdf:type rdf:Property ;
+    rdfs:domain doc:Example .
+
+doc:forTarget rdf:type rdf:Property ;
+  rdfs:domain doc:Requirement .
+
+
+# |standard| Defines the main subject: the Clojure documentation standard and its purpose.
+
+clj:Standard a doc:DocumentationStandard ;
+  rdfs:label "Clojure Documentation Standards" ;
+  doc:hasContext [
+    a doc:Context ;
+    rdfs:label "Why Clojure projects need documentation" ;
+    rdfs:comment "Documentation is needed for dependencies, code structure, implementation details, and testing, explaining both the 'what' and the 'why'."
+  ] ;
+  doc:hasRequirementCategory clj:DepReqs, clj:StructReqs, clj:ImplReqs, clj:ReadmeReqs ;
+  doc:hasKeyPoint
+    [ rdfs:comment "Document 'why' not just 'what'" ],
+    [ rdfs:comment "Include architectural diagrams" ],
+    [ rdfs:comment "Explain performance characteristics" ],
+    [ rdfs:comment "Document state management" ],
+    [ rdfs:comment "Show component relationships" ],
+    [ rdfs:comment "Include version rationale" ],
+    [ rdfs:comment "Document test strategies" ] .
+
+
+# |Requirement Categories and Examples|  Details each specific documentation requirement and provides illustrative examples.
+
+clj:DepReqs a doc:RequirementCategory ;
+  rdfs:label "Dependency Documentation" ;
+  doc:hasRequirement
+    [ doc:forTarget "project.clj"; rdfs:comment "Document the purpose, version constraints, and reason for specific versions of each dependency." ],
+    [ doc:forTarget "README"; rdfs:comment "Document core dependencies, version compatibility, and optional dependencies." ] ;
+  doc:hasExample clj:DepExample .
+
+clj:StructReqs a doc:RequirementCategory ;
+  rdfs:label "Structural Documentation" ;
+  doc:hasRequirement
+    [ doc:forTarget "namespace"; rdfs:comment "Document namespace responsibilities, key protocols/types, and public vs. private API." ],
+    [ doc:forTarget "component relationships"; rdfs:comment "Document dependency flow, data flow, and state management, including visual diagrams." ] ;
+  doc:hasExample clj:StructExample, clj:ArchExample .
+
+clj:ImplReqs a doc:RequirementCategory ;
+  rdfs:label "Implementation Documentation" ;
+  doc:hasRequirement
+    [ doc:forTarget "functions"; rdfs:comment "Document purpose, arguments, return values, side effects, performance, and concurrency impacts." ],
+    [ doc:forTarget "tests"; rdfs:comment "Document the test strategy, edge cases, and performance tests." ] .
+
+clj:ReadmeReqs a doc:RequirementCategory ;
+  rdfs:label "README Structure" ;
+  doc:hasRequirement
+    [ rdfs:comment "Include sections for Project Overview, Dependencies, Architecture, Quick Start, Development Guide, API Documentation, Testing Strategy, and Performance Notes." ] .
+
+    
+clj:DepExample a doc:Example ;
+  rdfs:label "Good dependency documentation in project.clj" ;
+  doc:hasCodeSnippet """
+:dependencies [[org.clojure/clojure "1.11.1"]
+               ;; Ring - HTTP server abstraction
+               [ring/ring-core "1.11.0" :exclusions [org.clojure/clojure]]
+               ;; Routing with Compojure for clear route definitions
+               [compojure "1.7.1"]
+               ;; Hiccup for HTML generation - stable API since 1.0.5
+               [hiccup "1.0.5"]]
+""" .
+
+clj:StructExample a doc:Example ;
+  rdfs:label "Good structural documentation in a namespace" ;
+  doc:hasCodeSnippet """
+(ns myapp.core
+  \"Core namespace handling HTTP routing and middleware configuration.
+
+   Component Relations:
+   - Uses middleware for request processing
+   - Delegates to handlers/* for business logic */
+   - Manages server lifecycle
+
+   State Management:
+   - No mutable state
+   - Uses Ring's immutable request/response model\"
+
+  (:require [ring.middleware.resource :refer [wrap-resource]]))
+""" .
+
+clj:ArchExample a doc:Example ;
+  rdfs:label "Good README architecture section with a diagram" ;
+  doc:hasCodeSnippet """
+
+## Architecture
+
+### Component Overview
+```mermaid
+graph TD
+    A[HTTP Server] --> B[Ring Middleware]
+    B --> C[Routes]
+    C --> D[Handlers]
+    D --> E[Database]
+""" .
+
+
+#------------------------------------- 
+# Dependencies
+#------------------------------------- 
+
+proj:dep-clojure a proj:Dependency ;
+    rdfs:label "org.clojure/clojure" ;
+    dcterms:description "Core Clojure language library." ;
+    proj:version "1.12.0" .
+
+proj:dep-ring-core a proj:Dependency ;
+    rdfs:label "ring/ring-core" ;
+    dcterms:description "The essential HTTP server abstraction for Clojure." ;
+    proj:version "1.14.1" .
+
+proj:dep-ring-jetty-adapter a proj:Dependency ;
+    rdfs:label "ring/ring-jetty-adapter" ;
+    dcterms:description "The web server that runs the Ring application." ;
+    proj:version "1.14.1" .
+
+proj:dep-compojure a proj:Dependency ;
+    rdfs:label "compojure" ;
+    dcterms:description "A concise routing library for Ring." ;
+    proj:version "1.7.1" .
+
+proj:dep-hiccup a proj:Dependency ;
+    rdfs:label "hiccup" ;
+    dcterms:description "A library for representing HTML in Clojure." ;
+    proj:version "2.0.0" .
+
+
+
+#------------------------------------- 
+# code lore
+#------------------------------------- 
+
+# |Clojure Namespace and Definitions|
+
+clj:simple-server.core a proj:ClojureNamespace ;
+    rdfs:label "simple-server.core" ;
+    dcterms:description "Core namespace handling HTTP routing, middleware, and server lifecycle." ;
+    proj:stateManagement "Stateless; uses Ring's immutable request/response model exclusively." ;
+    proj:defines clj:security-headers, clj:wrap-security-headers, clj:layout, clj:home-handler, clj:not-found-handler, clj:app-routes, clj:app, clj:main .
+
+clj:security-headers a proj:ClojureVariable ;
+    rdfs:label "security-headers" ;
+    dcterms:description "A map of security-related HTTP headers. This is a security invariant and MUST be implemented exactly as written." ;
+    proj:isPrivate true ;
+    proj:hasSecurityHeader
+        [ a proj:HttpHeader; proj:headerName "X-Frame-Options"; proj:headerValue "DENY" ],
+        [ a proj:HttpHeader; proj:headerName "X-Content-Type-Options"; proj:headerValue "nosniff" ],
+        [ a proj:HttpHeader; proj:headerName "X-XSS-Protection"; proj:headerValue "1; mode=block" ],
+        [ a proj:HttpHeader; proj:headerName "Strict-Transport-Security"; proj:headerValue "max-age=31536000; includeSubDomains" ],
+        [ a proj:HttpHeader; proj:headerName "Content-Security-Policy"; proj:headerValue "default-src 'none'; style-src 'self'; img-src 'self'; frame-ancestors 'none'" ] .
+
+clj:wrap-security-headers a proj:ClojureFunction, proj:Middleware ;
+    rdfs:label "wrap-security-headers" ;
+    dcterms:description "Ring middleware to merge a predefined set of security headers into the response." .
+
+clj:layout a proj:ClojureFunction ;
+    rdfs:label "layout" ;
+    dcterms:description "Defines the primary HTML page structure using Hiccup syntax." ;
+    proj:isPrivate true ;
+    proj:includesStylesheet "/css/style.css" .
+
+clj:home-handler a proj:ClojureFunction, proj:HttpHandler ;
+    rdfs:label "home-handler" ;
+    dcterms:description "Handles requests for the root path ('/'). Returns a 200 OK response with the home page HTML." ;
+    proj:returnsStatus 200 ;
+    proj:returnsBody "X Y Z Z Y" .
+
+clj:not-found-handler a proj:ClojureFunction, proj:HttpHandler ;
+    rdfs:label "not-found-handler" ;
+    dcterms:description "Handles all requests that do not match a defined route. Returns a 404 Not Found response with a custom HTML body." ;
+    proj:returnsStatus 404 ;
+    proj:returnsBody "You have entered the void. There is no one here. There is no place to go. There is no lamp." .
+
+clj:app-routes a proj:ClojureVariable, proj:RoutingDefinition ;
+    rdfs:label "app-routes" ;
+    dcterms:description "The core routing definition for the application, created with Compojure." ;
+    proj:definesRoute proj:route-home, proj:route-not-found .
+
+proj:route-home a proj:HttpRoute ;
+    proj:httpMethod "GET" ;
+    proj:pathPattern "/" ;
+    proj:isHandledBy clj:home-handler .
+
+proj:route-not-found a proj:HttpRoute ;
+    rdfs:label "not-found route" ;
+    dcterms:description "A catch-all route for any path not otherwise defined." ;
+    proj:isHandledBy clj:not-found-handler .
+
+clj:app a proj:ClojureVariable, proj:RingApplication ;
+    rdfs:label "app" ;
+    dcterms:description "The final, composed Ring application handler. It is constructed by applying a chain of middleware to the base routes." ;
+    proj:baseHandler clj:app-routes ;
+    proj:middlewareChain (
+        [ a proj:Middleware; rdfs:label "wrap-resource"; proj:servesFrom "public" ]
+        [ a proj:Middleware; rdfs:label "wrap-content-type" ]
+        clj:wrap-security-headers
+    ) .
+
+clj:main a proj:ClojureFunction ;
+    rdfs:label "-main" ;
+    dcterms:description "The application entry point. Starts a Jetty web server." ;
+    proj:defaultPort 3000 ;
+    proj:portConfiguration "Configured via the PORT environment variable." ;
+    proj:runsApplication clj:app .
+
+
+
+#------------------------------------- 
+# CSS Stylesheet
+#------------------------------------- 
+
+css:stylesheet a proj:CssStylesheet ;
+    rdfs:label "style.css" ;
+    proj:hasRule css:rule-html-body, css:rule-body, css:rule-content .
+
+css:rule-html-body a proj:CssRule ;
+    proj:selector "html, body" ;
+    proj:hasDeclaration
+        [ proj:property "height"; proj:value "100%" ],
+        [ proj:property "margin"; proj:value "0" ],
+        [ proj:property "padding"; proj:value "0" ],
+        [ proj:property "font-family"; proj:value "monospace, sans-serif" ] .
+
+css:rule-body a proj:CssRule ;
+    proj:selector "body" ;
+    proj:hasDeclaration
+        [ proj:property "background-color"; proj:value "#333333" ],
+        [ proj:property "color"; proj:value "#00FF00" ],
+        [ proj:property "display"; proj:value "flex" ],
+        [ proj:property "justify-content"; proj:value "center" ],
+        [ proj:property "align-items"; proj:value "center" ],
+        [ proj:property "text-align"; proj:value "center" ] .
+
+css:rule-content a proj:CssRule ;
+    proj:selector ".content" ;
+    proj:hasDeclaration
+        [ proj:property "padding"; proj:value "1em" ] .
+
+
+

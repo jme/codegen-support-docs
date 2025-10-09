@@ -1,0 +1,119 @@
+#------------------------------------- 
+# webserver code lore
+#------------------------------------- 
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+@prefix clj: <urn:uuid:8e8d6715-d816-43fd-a5b6-ab358fde25b6#> .
+@prefix proj: <urn:uuid:b9c22015-0e25-471e-91b5-250c7246a015#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix file: <urn:uuid:ed15c01b-a2e8-4875-ada1-09bd236d885f#> .
+
+
+# |Project Definition|
+
+proj:simple-server a doap:Project ;
+    doap:name "simple-server" ;
+    doap:version "1.0.0" ;
+    dcterms:description "Project simple-server A slightly secure, simple web application." ;
+    doap:homepage <http://example.com/project-simple-server> ;
+    doap:license <https://www.eclipse.org/legal/epl-2.0/> ;
+    proj:mainNamespace clj:simple-server.core ;
+    proj:hasFile file:project_clj, file:core_clj, file:style_css ;
+    proj:dependsOn proj:dep-clojure, proj:dep-ring-core, proj:dep-ring-jetty-adapter, proj:dep-compojure, proj:dep-hiccup .
+
+
+# |Source Files|
+
+file:project_clj a proj:SourceFile ;
+    rdfs:label "project.clj" ;
+    dcterms:format "text/x-clojure" .
+
+file:core_clj a proj:SourceFile ;
+    rdfs:label "core.clj" ;
+    dcterms:format "text/x-clojure" ;
+    proj:definesNamespace clj:simple-server.core .
+
+file:style_css a proj:SourceFile ;
+    rdfs:label "style.css" ;
+    rdfs:comment "This file is served from the 'public/css/' directory, as implied by the layout function's include-css and the wrap-resource middleware." ;
+    dcterms:format "text/css" ;
+    proj:definesStyle css:stylesheet .
+
+
+
+# |Clojure Namespace and Definitions|
+
+clj:simple-server.core a proj:ClojureNamespace ;
+    rdfs:label "simple-server.core" ;
+    dcterms:description "Core namespace handling HTTP routing, middleware, and server lifecycle." ;
+    proj:stateManagement "Stateless; uses Ring's immutable request/response model exclusively." ;
+    proj:defines clj:security-headers, clj:wrap-security-headers, clj:layout, clj:home-handler, clj:not-found-handler, clj:app-routes, clj:app, clj:main .
+
+clj:security-headers a proj:ClojureVariable ;
+    rdfs:label "security-headers" ;
+    dcterms:description "A map of security-related HTTP headers. This is a security invariant and MUST be implemented exactly as written." ;
+    proj:isPrivate true ;
+    proj:hasSecurityHeader
+        [ a proj:HttpHeader; proj:headerName "X-Frame-Options"; proj:headerValue "DENY" ],
+        [ a proj:HttpHeader; proj:headerName "X-Content-Type-Options"; proj:headerValue "nosniff" ],
+        [ a proj:HttpHeader; proj:headerName "X-XSS-Protection"; proj:headerValue "1; mode=block" ],
+        [ a proj:HttpHeader; proj:headerName "Strict-Transport-Security"; proj:headerValue "max-age=31536000; includeSubDomains" ],
+        [ a proj:HttpHeader; proj:headerName "Content-Security-Policy"; proj:headerValue "default-src 'none'; style-src 'self'; img-src 'self'; frame-ancestors 'none'" ] .
+
+clj:wrap-security-headers a proj:ClojureFunction, proj:Middleware ;
+    rdfs:label "wrap-security-headers" ;
+    dcterms:description "Ring middleware to merge a predefined set of security headers into the response." .
+
+clj:layout a proj:ClojureFunction ;
+    rdfs:label "layout" ;
+    dcterms:description "Defines the primary HTML page structure using Hiccup syntax." ;
+    proj:isPrivate true ;
+    proj:includesStylesheet "/css/style.css" .
+
+clj:home-handler a proj:ClojureFunction, proj:HttpHandler ;
+    rdfs:label "home-handler" ;
+    dcterms:description "Handles requests for the root path ('/'). Returns a 200 OK response with the home page HTML." ;
+    proj:returnsStatus 200 ;
+    proj:returnsBody "X Y Z Z Y" .
+
+clj:not-found-handler a proj:ClojureFunction, proj:HttpHandler ;
+    rdfs:label "not-found-handler" ;
+    dcterms:description "Handles all requests that do not match a defined route. Returns a 404 Not Found response with a custom HTML body." ;
+    proj:returnsStatus 404 ;
+    proj:returnsBody "You have entered the void. There is no one here. There is no place to go. There is no lamp." .
+
+clj:app-routes a proj:ClojureVariable, proj:RoutingDefinition ;
+    rdfs:label "app-routes" ;
+    dcterms:description "The core routing definition for the application, created with Compojure." ;
+    proj:definesRoute proj:route-home, proj:route-not-found .
+
+proj:route-home a proj:HttpRoute ;
+    proj:httpMethod "GET" ;
+    proj:pathPattern "/" ;
+    proj:isHandledBy clj:home-handler .
+
+proj:route-not-found a proj:HttpRoute ;
+    rdfs:label "not-found route" ;
+    dcterms:description "A catch-all route for any path not otherwise defined." ;
+    proj:isHandledBy clj:not-found-handler .
+
+clj:app a proj:ClojureVariable, proj:RingApplication ;
+    rdfs:label "app" ;
+    dcterms:description "The final, composed Ring application handler. It is constructed by applying a chain of middleware to the base routes." ;
+    proj:baseHandler clj:app-routes ;
+    proj:middlewareChain (
+        [ a proj:Middleware; rdfs:label "wrap-resource"; proj:servesFrom "public" ]
+        [ a proj:Middleware; rdfs:label "wrap-content-type" ]
+        clj:wrap-security-headers
+    ) .
+
+clj:main a proj:ClojureFunction ;
+    rdfs:label "-main" ;
+    dcterms:description "The application entry point. Starts a Jetty web server." ;
+    proj:defaultPort 3000 ;
+    proj:portConfiguration "Configured via the PORT environment variable." ;
+    proj:runsApplication clj:app .
+
