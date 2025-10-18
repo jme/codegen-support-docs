@@ -8,3 +8,4 @@ includes
 * a documentation subgraph
 * a source code & summary subgraph
 * a full Knowledge Graph containing ALL of the individual subgraphs
+* an example app (simple-webserver) generated using these contexts
