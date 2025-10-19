@@ -10,3 +10,5 @@ includes
 * a full Knowledge Graph containing ALL of the individual subgraphs
 * an example app (simple-webserver) generated using these contexts
 * the prompt used to generate the app
+* a list of any omissions or deviations from the codegen guidelines
+* listings of Knowledge Graph elements ussed during codegen, and those that were not used.
