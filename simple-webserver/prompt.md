@@ -5,6 +5,6 @@ The PRD shall be considered the Source of Truth for this code generation process
 After generating the code, perform a final, rigorous syntax and balance check on all parentheses, brackets, and braces to ensure the code is fully compilable and free of any errant characters.         
 
 Keep a running list of each element from the Primary Knowledge Graph (kg.ttl) that is actually used for the generation of the app, along with the inferred semantic requirement that required the usage. Provide this list at the end of the generation process.
-Also provide a similar list of the Primary Knowledge Graph elements that WERE used in the generation of the app.
+Also provide a similar list of the Primary Knowledge Graph elements that were not used in the generation of the app.
 
 
