@@ -1,0 +1,306 @@
+#-------------------------------------
+# Example Knowledge Graph (Rust/Axum).
+# Based on the Clojure/Ring example.
+#-------------------------------------
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix file: <urn:uuid:7f6d1b6a-8b1e-429a-8e2b-f06a0a9f8b4c#> .
+
+@prefix doc: <urn:uuid:693fc770-3642-42e6-9e25-c916de1c2420#> .
+@prefix rs: <urn:uuid:c2f5a8a1-3d7b-4b1f-8e4d-5c8a0a9f7b1e#> .
+@prefix css: <urn:uuid:4a850d5f-376f-4c0b-af5d-6515c11dbfde#> .
+@prefix proj: <urn:uuid:3b1a9b0c-1e8a-4b6e-a8f8-7c8d9e2a0b1f#> .
+
+
+# |Project Definition|
+
+proj:simple-axum-server a doap:Project ;
+    doap:name "simple-axum-server" ;
+    doap:version "0.1.0" ;
+    dcterms:description "Project simple-axum-server: A slightly secure, simple web application in Rust." ;
+    doap:homepage <http://example.com/project-simple-axum-server> ;
+    doap:license <https://opensource.org/licenses/MIT> ;
+    proj:mainCrate rs:simple_axum_server_crate ;
+    proj:hasFile file:Cargo_toml, file:main_rs, file:style_css ;
+    proj:dependsOn proj:dep-tokio, proj:dep-axum, proj:dep-tower-http, proj:dep-tracing .
+
+
+# |Source Files|
+
+file:Cargo_toml a proj:SourceFile ;
+    rdfs:label "Cargo.toml" ;
+    dcterms:format "text/x-toml" .
+
+file:main_rs a proj:SourceFile ;
+    rdfs:label "src/main.rs" ;
+    dcterms:format "text/x-rust" ;
+    proj:definesCrate rs:simple_axum_server_crate .
+
+file:style_css a proj:SourceFile ;
+    rdfs:label "style.css" ;
+    rdfs:comment "This file is served from the 'public/css/' directory, as implied by the layout function and the ServeDir middleware." ;
+    dcterms:format "text/css" ;
+    proj:definesStyle css:stylesheet .
+
+
+#-------------------------------------
+# doc lore : Models the specific rules, examples, and principles of the Rust documentation standard.
+# (This section is largely identical to the Clojure example, as it defines the meta-schema for documentation).
+#-------------------------------------
+
+# |Classes|
+doc:DocumentationStandard rdf:type rdfs:Class .
+doc:Context rdf:type rdfs:Class .
+doc:RequirementCategory rdf:type rdfs:Class .
+doc:Requirement rdf:type rdfs:Class .
+doc:Example rdf:type rdfs:Class .
+doc:KeyPoint rdf:type rdfs:Class .
+
+# |Properties|
+doc:hasContext rdf:type rdf:Property .
+doc:hasRequirementCategory rdf:type rdf:Property .
+doc:hasRequirement rdf:type rdf:Property .
+doc:hasExample rdf:type rdf:Property .
+doc:hasKeyPoint rdf:type rdf:Property .
+doc:hasCodeSnippet rdf:type rdf:Property .
+doc:forTarget rdf:type rdf:Property .
+
+# |standard| Defines the main subject: the Rust documentation standard.
+
+rs:Standard a doc:DocumentationStandard ;
+  rdfs:label "Rust Documentation Standards" ;
+  doc:hasContext [
+    a doc:Context ;
+    rdfs:label "Why Rust projects need documentation" ;
+    rdfs:comment "Documentation is needed for crate dependencies, code structure (modules, traits), unsafe blocks, and testing, explaining both the 'what' and the 'why'."
+  ] ;
+  doc:hasRequirementCategory rs:DepReqs, rs:StructReqs, rs:ImplReqs, rs:ReadmeReqs ;
+  doc:hasKeyPoint
+    [ rdfs:comment "Document 'why' not just 'what'" ],
+    [ rdfs:comment "Explain 'unsafe' blocks rigorously" ],
+    [ rdfs:comment "Document concurrency and ownership models" ],
+    [ rdfs:comment "Explain error handling strategies" ],
+    [ rdfs:comment "Show crate relationships" ],
+    [ rdfs:comment "Include version rationale in Cargo.toml" ],
+    [ rdfs:comment "Document test strategies and build features" ] .
+
+
+# |Requirement Categories and Examples|
+
+rs:DepReqs a doc:RequirementCategory ;
+  rdfs:label "Dependency Documentation" ;
+  doc:hasRequirement
+    [ doc:forTarget "Cargo.toml"; rdfs:comment "Document the purpose, version constraints, and required features for each dependency." ],
+    [ doc:forTarget "README"; rdfs:comment "Document core dependencies, version compatibility, and optional 'feature' flags." ] ;
+  doc:hasExample rs:DepExample .
+
+rs:StructReqs a doc:RequirementCategory ;
+  rdfs:label "Structural Documentation" ;
+  doc:hasRequirement
+    [ doc:forTarget "module"; rdfs:comment "Document module responsibilities, key traits/structs, and public vs. private API." ],
+    [ doc:forTarget "crate relationships"; rdfs:comment "Document dependency flow, data flow, and async runtime usage, including visual diagrams." ] ;
+  doc:hasExample rs:StructExample, rs:ArchExample .
+
+rs:ImplReqs a doc:RequirementCategory ;
+  rdfs:label "Implementation Documentation" ;
+  doc:hasRequirement
+    [ doc:forTarget "functions"; rdfs:comment "Document purpose, arguments, return values (especially Result/Option), side effects, and async/concurrency impacts." ],
+    [ doc:forTarget "tests"; rdfs:comment "Document the test strategy, edge cases, and integration tests." ] .
+
+rs:ReadmeReqs a doc:RequirementCategory ;
+  rdfs:label "README Structure" ;
+  doc:hasRequirement
+    [ rdfs:comment "Include sections for Project Overview, Dependencies (and Features), Architecture, Quick Start, Development Guide, API Documentation (link to docs.rs), Testing Strategy, and Performance Notes." ] .
+
+    
+rs:DepExample a doc:Example ;
+  rdfs:label "Good dependency documentation in Cargo.toml" ;
+  doc:hasCodeSnippet """
+[dependencies]
+# The core async runtime
+tokio = { version = \"1.38.0\", features = [\"full\"] }
+
+# Axum web framework
+axum = \"0.7.5\"
+
+# Tower-http for middleware (e.g., static files, headers)
+tower-http = { version = \"0.5.2\", features = [\"fs\", \"set-header\"] }
+
+# Tracing for logging
+tracing = \"0.1.40\"
+""" .
+
+rs:StructExample a doc:Example ;
+  rdfs:label "Good structural documentation in a module (e.g., src/main.rs)" ;
+  doc:hasCodeSnippet """
+//! # My App Crate
+//!
+//! Core crate handling HTTP routing and middleware configuration for the server.
+//!
+//! ## Component Relations:
+//! - Uses `tower-http` middleware layers for request processing.
+//! - Delegates to handler functions for business logic.
+//! - Manages server lifecycle via `tokio` runtime.
+//!
+//! ## State Management:
+//! - No mutable global state.
+//! - Uses Axum's `State` extractor for shared, read-only state if needed.
+
+use axum::{routing::get, Router};
+use tower_http::services::ServeDir;
+""" .
+
+rs:ArchExample a doc:Example ;
+  rdfs:label "Good README architecture section with a diagram" ;
+  doc:hasCodeSnippet """
+
+## Architecture
+
+### Component Overview
+```mermaid
+graph TD
+    A[Tokio Runtime] --> B[Axum Server]
+    B --> C[Tower-HTTP Layers (Middleware)]
+    C --> D[Axum Router]
+    D -- / --> E[Home Handler]
+    D -- /public/* --> F[Static File Service]
+    D -- 404 --> G[Not Found Handler]
+""" .
+
+
+#-------------------------------------
+# Dependencies (Crates)
+#-------------------------------------
+
+proj:dep-tokio a proj:Dependency ;
+    rdfs:label "tokio" ;
+    dcterms:description "An asynchronous runtime for the Rust programming language." ;
+    proj:version "1.38.0" .
+
+proj:dep-axum a proj:Dependency ;
+    rdfs:label "axum" ;
+    dcterms:description "A web application framework that focuses on ergonomics and modularity." ;
+    proj:version "0.7.5" .
+
+proj:dep-tower-http a proj:Dependency ;
+    rdfs:label "tower-http" ;
+    dcterms:description "A set of HTTP-specific middleware and utilities for Tower." ;
+    proj:version "0.5.2" .
+
+proj:dep-tracing a proj:Dependency ;
+    rdfs:label "tracing" ;
+    dcterms:description "A framework for instrumenting Rust programs to collect structured, event-based diagnostic information." ;
+    proj:version "0.1.40" .
+
+
+#-------------------------------------
+# code lore (Rust)
+#-------------------------------------
+
+# |Rust Crate and Definitions|
+
+rs:simple_axum_server_crate a proj:RustCrate ;
+    rdfs:label "simple-axum-server" ;
+    dcterms:description "Core crate handling HTTP routing, middleware, and server lifecycle." ;
+    proj:stateManagement "Stateless; uses Axum's handler-based model." ;
+    proj:defines rs:main, rs:app, rs:layout, rs:home_handler, rs:not_found_handler, rs:security_headers_layer .
+
+rs:security_headers_layer a proj:RustFunction, proj:Middleware ;
+    rdfs:label "security_headers_layer" ;
+    dcterms:description "A Tower-HTTP layer to merge a predefined set of security headers into the response. This is a security invariant." ;
+    proj:hasSecurityHeader
+        [ a proj:HttpHeader; proj:headerName "X-Frame-Options"; proj:headerValue "DENY" ],
+        [ a proj:HttpHeader; proj:headerName "X-Content-Type-Options"; proj:headerValue "nosniff" ],
+        [ a proj:HttpHeader; proj:headerName "X-XSS-Protection"; proj:headerValue "1; mode=block" ],
+        [ a proj:HttpHeader; proj:headerName "Strict-Transport-Security"; proj:headerValue "max-age=31536000; includeSubDomains" ],
+        [ a proj:HttpHeader; proj:headerName "Content-Security-Policy"; proj:headerValue "default-src 'none'; style-src 'self'; img-src 'self'; frame-ancestors 'none'" ] .
+
+rs:layout a proj:RustFunction ;
+    rdfs:label "layout" ;
+    dcterms:description "Defines the primary HTML page structure. Returns a string literal." ;
+    proj:isPrivate true ;
+    proj:includesStylesheet "/css/style.css" ;
+    proj:returnsType "&'static str" .
+
+rs:home_handler a proj:RustFunction, proj:HttpHandler ;
+    rdfs:label "home_handler" ;
+    dcterms:description "Handles requests for the root path ('/'). Returns a 200 OK response with the home page HTML." ;
+    proj:attribute "#[axum::debug_handler]" ;
+    proj:returnsType "axum::response::Html<&'static str>" ;
+    proj:returnsStatus 200 ;
+    proj:returnsBody "X Y Z Z Y" .
+
+rs:not_found_handler a proj:RustFunction, proj:HttpHandler ;
+    rdfs:label "not_found_handler" ;
+    dcterms:description "Handles all requests that do not match a defined route. Returns a 404 Not Found response." ;
+    proj:attribute "#[axum::debug_handler]" ;
+    proj:returnsType "(axum::http::StatusCode, axum::response::Html<&'static str>)" ;
+    proj:returnsStatus 404 ;
+    proj:returnsBody "You have entered the void. There is no one here. There is no place to go. There is no lamp." .
+
+rs:app a proj:RustRouter ;
+    rdfs:label "app" ;
+    dcterms:description "The final, composed Axum Router. It binds routes to handlers and applies middleware layers." ;
+    proj:definesRoute proj:route-home, proj:route-static ;
+    proj:fallbackHandler rs:not_found_handler ;
+    proj:middlewareChain (
+        rs:security_headers_layer
+        [ a proj:Middleware; rdfs:label "SetContentTypeLayer" ]
+    ) .
+
+proj:route-home a proj:HttpRoute ;
+    proj:httpMethod "GET" ;
+    proj:pathPattern "/" ;
+    proj:isHandledBy rs:home_handler .
+
+proj:route-static a proj:HttpRoute ;
+    rdfs:label "static file route" ;
+    dcterms:description "A route that serves static assets from the 'public' directory." ;
+    proj:httpMethod "GET" ;
+    proj:pathPattern "/public/*" ;
+    proj:isHandledBy "[ServeDir service from tower-http]" .
+
+
+rs:main a proj:RustFunction ;
+    rdfs:label "main" ;
+    dcterms:description "The application entry point. Starts a Tokio runtime and binds the Axum server to a port." ;
+    proj:attribute "#[tokio::main]" ;
+    proj:defaultPort 3000 ;
+    proj:portConfiguration "Configured via the PORT environment variable." ;
+    proj:runsApplication rs:app .
+
+
+#-------------------------------------
+# CSS Stylesheet
+# (This section is identical, as CSS is language-agnostic)
+#-------------------------------------
+
+css:stylesheet a proj:CssStylesheet ;
+    rdfs:label "style.css" ;
+    proj:hasRule css:rule-html-body, css:rule-body, css:rule-content .
+
+css:rule-html-body a proj:CssRule ;
+    proj:selector "html, body" ;
+    proj:hasDeclaration
+        [ proj:property "height"; proj:value "100%" ],
+        [ proj:property "margin"; proj:value "0" ],
+        [ proj:property "padding"; proj:value "0" ],
+        [ proj:property "font-family"; proj:value "monospace, sans-serif" ] .
+
+css:rule-body a proj:CssRule ;
+    proj:selector "body" ;
+    proj:hasDeclaration
+        [ proj:property "background-color"; proj:value "#333333" ],
+        [ proj:property "color"; proj:value "#00FF00" ],
+        [ proj:property "display"; proj:value "flex" ],
+        [ proj:property "justify-content"; proj:value "center" ],
+        [ proj:property "align-items"; proj:value "center" ],
+        [ proj:property "text-align"; proj:value "center" ] .
+
+css:rule-content a proj:CssRule ;
+    proj:selector ".content" ;
+    proj:hasDeclaration
+        [ proj:property "padding"; proj:value "1em" ] .

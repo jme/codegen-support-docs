@@ -1,0 +1,25 @@
+[package]
+name = "wserver"
+version = "0.1.0"
+edition = "2024"
+ 
+[dependencies]
+# The core asynchronous runtime for Rust.
+# Updated to the latest stable version.
+tokio = { version = "1.48.0", features = ["full"] }
+
+# Axum web framework.
+# Updated to the latest stable version.
+axum = "0.8.6"
+
+# Tower-http middleware.
+# Updated to the latest stable version.
+tower-http = { version = "0.6.6", features = ["fs", "set-header"] }
+
+# Tracing framework for structured logging.
+# Updated to the latest stable version.
+tracing = "0.1.40" # Note: 0.1.40 is the latest in the 0.1 series, but consider migrating to 0.2.x
+
+# Tracing-subscriber for log formatting and output.
+# Updated to 0.3.20 to patch CVE-2025-58160.
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
